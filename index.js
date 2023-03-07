@@ -2,6 +2,9 @@ const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const consoleTable = require('console.table');
 
+const addRolesMenu = require('./helper/roles');
+const {addEmployeesMenu, udpateEmployeesMenu} = require('./helper/employees')
+
 const options = [
     `View all departments`, 
     `View all roles`, 
@@ -27,42 +30,55 @@ const showMainMenu = () => {
         message: 'What would you like to do?',
         choices: options,
     }]).then((choice) => {
-        if (choice === `View all departments`){
+        const {menu} = choice;
+        console.log(menu);
+        if (menu === `View all departments`){
             console.log('View all dept')
-        } else if (choice === `View all roles`){
+            //showAllDept()
+        } else if (menu === `View all roles`){
             console.log('view all roles')
-        } else if (choice === `View all employees`){
-        // } else if (choice === `View employees by managers`){
+            //showAllRoles();
+        } else if (menu === `View all employees`){
+            //showAllEmployees();
+        // } else if (menu === `View employees by managers`){
         //     showMainMenu();
-        // } else if (choice === `View employees by department`){
+        // } else if (menu === `View employees by department`){
         //     showMainMenu();
-        // } else if (choice === `View combined salaries of all employees in a given department`){
+        // } else if (menu === `View combined salaries of all employees in a given department`){
         //     showMainMenu();
-        } else if (choice === `Add a department`){
-        }else if (choice === `Add a role`){
-        } else if (choice === `Add an employee`){
-        } else if (choice === `Update an employee role`){
-        // } else if (choice === `Update employee managers`){
+        } else if (menu === `Add a department`){
+            addDepartmentMenu();
+        }else if (menu === `Add a role`){
+            addRolesMenu(showMainMenu);
+        } else if (menu === `Add an employee`){
+            addEmployeesMenu(showMainMenu);
+        } else if (menu === `Update an employee role`){
+            udpateEmployeesMenu(showMainMenu);
+        // } else if (menu === `Update employee managers`){
         //     showMainMenu();
-        // } else if (choice === `Delete a department`){
+        // } else if (menu === `Delete a department`){
         //     showMainMenu();
-        // } else if (choice === `Delete a role`){
+        // } else if (menu === `Delete a role`){
         //     showMainMenu();
-        // } else if (choice === `Delete an employee`){
+        // } else if (menu === `Delete an employee`){
         //     showMainMenu();
-        } else {
-            console.log('Program ending')
+        } else{
+            return;
         }
     })
 };
 
-const db = mysql.createConnection(
-    {
-        host: 'localhost',
-        user: 'root',
-        password: 'IuvenesDum$umus2',
-        database: 'employee_tracker'
-    }
-)
+const addDepartmentMenu = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'department-name',
+            message: 'What is the name of the department?'
+        }
+    ]).then(() => {
+        //TODO: add function to add department, passing answer.trim() as a parameter
+        showMainMenu();
+    })
+}
 
-showMainMenu();
+showMainMenu()
