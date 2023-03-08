@@ -1,6 +1,8 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 
+const {addRoles, deleteRole} = require('../helper/role')
+
 const db = mysql.createConnection(
     {
         host: 'localhost',
@@ -11,7 +13,7 @@ const db = mysql.createConnection(
 );
 
 const addRolesMenu = (showMainMenu) => {
-    sql = `SELECT name FROM department;`
+    const sql = `SELECT name FROM department;`
     db.promise()
     .query(sql)
     .then((data) => {
@@ -33,10 +35,35 @@ const addRolesMenu = (showMainMenu) => {
             }
         ]).then((response) => {
             const {roleName, salary, departmentList} = response;
-            console.log(roleName, salary, departmentList);
+            const newRole = roleName.trim();
+            const newSalary = salary.trim();
+            addRoles(newRole, newSalary, departmentList)
+            console.log(`${roleName} added to ${departmentList}`);
             showMainMenu();
         })
     })
 }
 
-module.exports = addRolesMenu
+const deleteRoleMenu = (showMainMenu) => {
+    const sql = `SELECT title FROM role;`
+    db.promise()
+    .query(sql)
+    .then((data)=>{
+        const roleData = data[0].map((role) => role.title)
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'roles',
+                message: `Which role would you like to delete?`,
+                choices: roleData
+            }
+        ]).then((response) => {
+            const {roles} = response; 
+            deleteRole(roles);
+            console.log(`${roles} removed.`)
+            showMainMenu()
+        })
+    })
+}
+
+module.exports = {addRolesMenu, deleteRoleMenu}
