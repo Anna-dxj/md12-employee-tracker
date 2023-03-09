@@ -10,7 +10,19 @@ const db = mysql.createConnection(
     }
 );
 
-const addDepartment = (department) =>{}
-const deleteDepartment = (department) => {}
+const addDepartment = (department) =>{
+    const sql = `INSERT INTO department (name)
+    VALUES (?)`
+    const params = department
+    db.promise()
+    .query(sql, params)
+}
+const deleteDepartment = (department) => {
+    const sql = `DELETE FROM department
+    WHERE id = ?`
+    const params = department
+    db.promise()
+    .query(sql, params)
+}
 
 module.exports = {addDepartment, deleteDepartment}

@@ -1,5 +1,4 @@
 const mysql = require('mysql2');
-const consoleTable = require('console.table');
 
 const db = mysql.createConnection(
     {
@@ -10,7 +9,20 @@ const db = mysql.createConnection(
     }
 );
 
-const addRoles = (roleName, salary, department) => {}
-const deleteRole = (roleName) => {}
+const addRoles = (roleName, salary, department) => {
+    const sql = `INSERT INTO role (title, salary, department_id)
+    VALUES (?, ?, ?);`
+    const params = [roleName, salary, department]
+    db.promise()
+    .query(sql, params)
+}
+
+const deleteRole = (roleName) => {
+    const sql = `DELETE FROM role
+    WHERE id = ?;`
+    const params = roleName
+    db.promise()
+    .query(sql, params)
+}
 
 module.exports = {addRoles, deleteRole}

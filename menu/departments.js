@@ -23,18 +23,19 @@ const addDepartmentMenu = (showMainMenu) => {
         const {department} = response;
         const newDepartment = department.trim();
         addDepartment(newDepartment)
-        //TODO: add function to add department, passing answer.trim() as a parameter
         console.log(`${newDepartment} added!`)
         showMainMenu();
     })
 }
 
 const deleteDepartmentMenu = (showMainMenu) => {
-    const sql = `SELECT name FROM department;`
+    const sql = `SELECT id, name FROM department;`
     db.promise()
     .query(sql)
     .then((data) => {
-        const departmentData = data[0].map((department) => department.name)
+        const departmentData = data[0].map((department) => {
+            return `${department.id} ${department.name}`
+        })
         inquirer.prompt([
             {
                 type: 'list',
@@ -44,8 +45,13 @@ const deleteDepartmentMenu = (showMainMenu) => {
             }
         ]).then((response) => {
             const {departments} = response;
-            deleteDepartment(departments)
-            console.log(`${departments} removed.`)
+
+            const departmentParts = departments.split(' ');
+            const departmentId = departmentParts[0];
+            const departmentName = departments.slice(2)
+            
+            deleteDepartment(departmentId)
+            console.log(`${departmentName} removed.`)
             showMainMenu()
         })
     })

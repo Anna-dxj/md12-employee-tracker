@@ -13,11 +13,13 @@ const db = mysql.createConnection(
 );
 
 const addRolesMenu = (showMainMenu) => {
-    const sql = `SELECT name FROM department;`
+    const sql = `SELECT id, name FROM department;`
     db.promise()
     .query(sql)
     .then((data) => {
-        const departmentData = data[0].map((department) => department.name)
+        const departmentData = data[0].map((department) => {
+            return `${department.id} ${department.name}`
+        })
         inquirer.prompt([
             {
                 type: 'input',
@@ -29,27 +31,36 @@ const addRolesMenu = (showMainMenu) => {
                 message: 'What is the salary of the role?'
             },{
                 type: 'list',
-                name: 'departmentList',
+                name: 'department',
                 message: 'To what department does this role belong?',
                 choices: departmentData,
             }
         ]).then((response) => {
-            const {roleName, salary, departmentList} = response;
+            console.log(response);
+            const {roleName, salary, department} = response;
+
+            const departmentParts = department.split(' ');
+            const departmentId = departmentParts[0];
+            const departmentName = department.slice(2);
+
             const newRole = roleName.trim();
             const newSalary = salary.trim();
-            addRoles(newRole, newSalary, departmentList)
-            console.log(`${roleName} added to ${departmentList}`);
+
+            addRoles(newRole, newSalary, departmentId)
+            console.log(`${roleName} added to ${departmentName}`);
             showMainMenu();
         })
     })
 }
 
 const deleteRoleMenu = (showMainMenu) => {
-    const sql = `SELECT title FROM role;`
+    const sql = `SELECT id, title FROM role;`
     db.promise()
     .query(sql)
     .then((data)=>{
-        const roleData = data[0].map((role) => role.title)
+        const roleData = data[0].map((role) => {
+            return `${role.id} ${role.title}`
+        })
         inquirer.prompt([
             {
                 type: 'list',
@@ -59,8 +70,11 @@ const deleteRoleMenu = (showMainMenu) => {
             }
         ]).then((response) => {
             const {roles} = response; 
-            deleteRole(roles);
-            console.log(`${roles} removed.`)
+            const roleParts = roles.split(' ');
+            const roleId = roleParts[0]; 
+            const roleName = roles.split(2);
+            deleteRole(roleId);
+            console.log(`${roleName} removed.`)
             showMainMenu()
         })
     })

@@ -13,18 +13,20 @@ const db = mysql.createConnection(
 );
 
 const addEmployeesMenu = (showMainMenu) => {
-    sql = [`SELECT title FROM role;`, `SELECT first_name, last_name FROM employee WHERE manager_id IS NULL;`]
+    sql = [`SELECT id, title FROM role;`, `SELECT id, first_name, last_name FROM employee;`]
     db.promise()
     .query(sql[0])
     .then((roleData)=>{
-        const rolesData = roleData[0].map((role) => role.title)
+        const rolesData = roleData[0].map((role) => {
+            return `${role.id} ${role.title}`
+        })
         return rolesData;
     }).then((roleData) => {
         db.promise()
         .query(sql[1])
         .then((managerData) => {
             const managersData = managerData[0].map((manager) => {
-                return `${manager.first_name} ${manager.last_name}`
+                return `${manager.id} ${manager.first_name} ${manager.last_name}`
             })
             inquirer.prompt([
                 {
@@ -48,10 +50,18 @@ const addEmployeesMenu = (showMainMenu) => {
                 }
             ]).then((response) => {
                 const {firstName, lastName, role, manager} = response;
+
+                const roleParts = role.split(' ');
+                const roleId = roleParts[0];
+                const roleName = roleParts[1];
+
+                const managerParts = manager.split(' ');
+                const managerId = managerParts[0]
+
                 const givenName = firstName.trim();
                 const surname = lastName.trim();
-                addEmployee(givenName, surname, role, manager);
-                console.log(`${firstName} ${lastName} added as ${role}`)
+                addEmployee(givenName, surname, roleId, managerId);
+                console.log(`${givenName} ${surname} added as ${roleName}`)
                 showMainMenu();
             })
         })
@@ -59,35 +69,43 @@ const addEmployeesMenu = (showMainMenu) => {
 };
 
 const updateEmployeeRolesMenu = (showMainMenu) => {
-    const sql = [`SELECT first_name, last_name FROM employee;`, `SELECT title FROM role;`]
+    const sql = [`SELECT id, first_name, last_name FROM employee;`, `SELECT id, title FROM role;`]
     db.promise()
     .query(sql[0])
     .then((nameData) => {
         const employeeData = nameData[0].map((employee) => {
-            return `${employee.first_name} ${employee.last_name}`
+            return `${employee.id} ${employee.first_name} ${employee.last_name}`
         })
-        return employeeData;
-    }).then((employeeData) => {
         db.promise()
         .query(sql[1])
         .then((roleData) => {
-            const rolesData = roleData[0].map((role) => role.title)
+            const rolesData = roleData[0].map((role) => {
+                return `${role.id} ${role.title}`
+            })
             inquirer.prompt([
                 {
                     type: 'list', 
                     name: 'name',
                     message: `Which employee's role would you like to update?`,
-                    choices: rolesData
+                    choices: employeeData
                 }, {
                     type: 'list',
                     name: 'role',
                     message: `What is this employee's new role?`,
-                    choices: employeeData
+                    choices: rolesData
                 }
             ]).then((response) => {
                 const {name, role} = response;
-                updateEmployeeRole(name, role)
-                console.log(`Updated ${name} as ${role}`);
+                const employeeData = name.split(' ')
+                const employeeId = employeeData[0]
+                const employeeName= name.slice(2)
+
+                const roleData = role.split(' ')
+                const roleId = roleData[0]
+                const roleName = role.slice(2)
+
+                updateEmployeeRole(roleId, employeeId)
+                console.log(`Updated ${employeeName} as ${roleName}`);
                 showMainMenu()
             })
         })
@@ -95,12 +113,12 @@ const updateEmployeeRolesMenu = (showMainMenu) => {
 };
 
 const updateEmployeeManagerMenu = (showMainMenu) => {
-    const sql = `SELECT first_name, last_name FROM employee;`
+    const sql = `SELECT id, first_name, last_name FROM employee;`
     db.promise()
     .query(sql)
     .then((data) => {
         const employeeData = data[0].map((employee) => {
-            return `${employee.first_name} ${employee.last_name}`
+            return `${employee.id} ${employee.first_name} ${employee.last_name}`
         })
         inquirer.prompt([
             {
@@ -111,17 +129,16 @@ const updateEmployeeManagerMenu = (showMainMenu) => {
             }
         ]).then((data) =>{
             const {employees} = data
-            const employeeName = employees.split(' ')
-            const [givenName, surname] = employeeName;
-            return [givenName, surname]
-        }).then((data) => {
-            const [givenName, surname] = data;
-            const sql2 = `SELECT first_name, last_name FROM employee WHERE manager_id IS NULL AND first_name <> '${givenName}' AND last_name <> '${surname}';`
+            const employeeData = employees.split(' ')
+            const [employeeId, givenName, surname] = employeeData
+
+            const sql2 = `SELECT id, first_name, last_name FROM employee;`
+
             db.promise()
             .query(sql2)
             .then((data) => {
                 const managerData = data[0].map((manager) => {
-                    return `${manager.first_name} ${manager.last_name}`
+                    return `${manager.id} ${manager.first_name} ${manager.last_name}`
                 })
                 inquirer.prompt([
                     {
@@ -132,10 +149,15 @@ const updateEmployeeManagerMenu = (showMainMenu) => {
                     }
                 ]).then((data)=>{
                     const {managers} = data;
+                    const managerArr = managers.split(' ')
+                    const managerId = managerArr[0]
+                    const managerName = managers.slice(2)
+
                     const employee = `${givenName} ${surname}`;
-                    console.log(employee)
-                    updateEmployeeManager(employee, managers)
-                    console.log(`Updated ${employee}'s manager to ${managers}.`)
+
+                    updateEmployeeManager(managerId, employeeId)
+                    console.log(`Updated ${employee}'s manager to ${managerName}.`)
+                    
                     showMainMenu()
                 })
             })
@@ -144,12 +166,12 @@ const updateEmployeeManagerMenu = (showMainMenu) => {
 }
 
 const deleteEmployeeMenu = (showMainMenu) => {
-    const sql = `SELECT first_name, last_name FROM employee;`
+    const sql = `SELECT id, first_name, last_name FROM employee;`
     db.promise()
     .query(sql)
     .then((data) => {
         const employeeData = data[0].map((employee) => {
-            return `${employee.first_name} ${employee.last_name}`
+            return `${employee.id} ${employee.first_name} ${employee.last_name}`
         })
         inquirer.prompt([
             {
@@ -160,8 +182,11 @@ const deleteEmployeeMenu = (showMainMenu) => {
             }
         ]).then((response) => {
             const {employees} = response
-            deleteEmployee(employees)
-            console.log(`${employees} removed.`);
+            const employeeData = employees.split(' ')
+            const employeeId = employeeData[0];
+            const employeeName = employees.slice(2)
+            deleteEmployee(employeeId)
+            console.log(`${employeeName} removed.`);
             showMainMenu()
         })
     })

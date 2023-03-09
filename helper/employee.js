@@ -10,10 +10,38 @@ const db = mysql.createConnection(
     }
 );
 
-const addEmployee = (firstName, lastName, role, LockManager) => {}
-const updateEmployeeRole = (name, role) => {}
-const updateEmployeeManager = (givenName, surname, manager) => {}
-const deleteEmployee = (employees) => {}
+const addEmployee = (firstName, lastName, role, manager) => {
+    const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+    VALUES (?, ?, ?, ?)`
+    const params = [firstName, lastName, role, manager]
+    db.promise()
+    .query(sql, params)
+}
+const updateEmployeeRole = (role, employee) => {
+    const sql = `UPDATE employee SET role_id = ? WHERE id = ?`
+    params = [role, employee]
+    db.promise()
+    .query(sql, params)
+}
+const updateEmployeeManager = (manager, employee) => {
+    const sql = `UPDATE employee SET manager_id = ? WHERE id = ?`
+    if (employee === manager) {
+        const params = [null, employee]
+        db.promise()
+        .query(sql, params);
+    } else {
+        const params = [manager, employee]
+        db.promise()
+        .query(sql, params)
+    }
+}
+const deleteEmployee = (employee) => {
+    const sql = `DELETE FROM employee
+    WHERE id = ?`
+    const params = employee
+    db.promise()
+    .query(sql, params)
+}
 
 module.exports = {
     addEmployee,

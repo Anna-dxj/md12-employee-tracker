@@ -1,20 +1,17 @@
 const inquirer = require('inquirer');
-const mysql = require('mysql2');
-const consoleTable = require('console.table');
 
 const {addDepartmentMenu, deleteDepartmentMenu} = require('./menu/departments')
 const {addRolesMenu, deleteRoleMenu} = require('./menu/roles');
 const {addEmployeesMenu, updateEmployeeRolesMenu, updateEmployeeManagerMenu, deleteEmployeeMenu} = require('./menu/employees');
-const {viewAllDepartments, viewAllRoles, viewAllEmployees, viewEmployeeByManager, viewEmployeeByDepartment, viewSalariesByDepartment} = require('./helper/view')
+const {viewAllDepartments, viewAllRoles, viewAllEmployees, viewEmployeeByManager, viewEmployeeByDepartment} = require('./helper/view')
 
 
 const options = [
     `View all departments`, 
     `View all roles`, 
     `View all employees`, 
-//    `View employees by managers`, 
-//    `View employees by department`, 
-//    `View combined salaries of all employees in a given department`,
+    `View employees by managers`, 
+    `View employees by department`, 
     `Add a department`,
     `Add a role`, 
     `Add an employee`, 
@@ -44,8 +41,6 @@ const showMainMenu = () => {
             viewEmployeeByManager(showMainMenu)
         } else if (menu === `View employees by department`){
             viewEmployeeByDepartment(showMainMenu)
-        } else if (menu === `View combined salaries of all employees in a given department`){
-            viewSalariesByDepartment(showMainMenu)
         } else if (menu === `Add a department`){
             addDepartmentMenu(showMainMenu);
         }else if (menu === `Add a role`){
@@ -63,7 +58,8 @@ const showMainMenu = () => {
         } else if (menu === `Delete an employee`){
             deleteEmployeeMenu(showMainMenu)
         } else if (menu === `I'm done`){
-            return;
+            console.log(`Exiting`)
+            process.exit()
         }
     })
 };
