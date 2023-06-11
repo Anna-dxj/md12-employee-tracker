@@ -2,6 +2,8 @@
 
   ## Description
   The Employee Tracker is a command line-run application that allows a business owner to add departments, roles, and employees, update them, or delete them. This application also allows a user to look at all roles, department, and employees, and its related data. This application should allow a business owner to organize and plan their business.
+
+  After running the program, a user should be faced with a terminal that looks like the screenshot: ![Screenshot of Employee Tracker](./screenshot/screenshot.png)
   
   This application uses SQL to fetch data from the database and the following npm packages: [console.table](https://www.npmjs.com/package/console.table), [inquirer](https://www.npmjs.com/package/inquirer/v/8.2.4), and [mysql2](https://www.npmjs.com/package/mysql2). 
 
